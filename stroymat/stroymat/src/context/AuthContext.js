@@ -11,26 +11,70 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  function login(email, password) {
-    return auth.signInWithEmailAndPassword(email, password);
+  // Функция входа
+  async function login(email, password) {
+    try {
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      const token = await userCredential.user.getIdToken();
+      
+      // Сохраняем токен в localStorage
+      localStorage.setItem('userToken', token);
+      return userCredential;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
   }
 
-  function logout() {
-    return auth.signOut()
-      .then(() => {
-        setCurrentUser(null);
-        window.location.href = '/login'; // Перенаправление после выхода
-      })
-      .catch(error => {
-        console.error("Logout error:", error);
-      });
+  // Функция выхода (полностью обновленная)
+  async function logout() {
+    try {
+      // 1. Выход из Firebase
+      await auth.signOut();
+      
+      // 2. Очищаем состояние
+      setCurrentUser(null);
+      
+      // 3. Удаляем данные из localStorage
+      localStorage.removeItem('userToken');
+      
+      // 4. Отправляем запрос на серверный выход (если используется PHP-сессия)
+      try {
+        await fetch('/auth/logout.php', {
+          method: 'POST',
+          credentials: 'include'
+        });
+      } catch (serverError) {
+        console.warn("Server logout failed (ignoring):", serverError);
+      }
+      
+      console.log('Successfully logged out from all systems');
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
+    }
   }
 
+  // Проверка состояния аутентификации
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      setCurrentUser(user);
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // Получаем свежий токен при каждом изменении состояния
+        const token = await user.getIdToken();
+        localStorage.setItem('userToken', token);
+        setCurrentUser(user);
+      } else {
+        localStorage.removeItem('userToken');
+        setCurrentUser(null);
+      }
       setLoading(false);
     });
+
+    // Восстановление сессии из localStorage при загрузке
+    const token = localStorage.getItem('userToken');
+    if (token && !currentUser) {
+      // Здесь можно добавить проверку токена на сервере
+    }
 
     return unsubscribe;
   }, []);
@@ -38,7 +82,8 @@ export function AuthProvider({ children }) {
   const value = {
     currentUser,
     login,
-    logout
+    logout,
+    loading
   };
 
   return (

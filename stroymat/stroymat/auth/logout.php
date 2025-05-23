@@ -1,11 +1,12 @@
-import LogoutButton from './components/LogoutButton';
+<?php
+header("Content-Type: application/json");
+session_start();
 
-function LogoutButton() {
-  const { logout } = useAuth();
+// Очищаем сессию PHP
+$_SESSION = array();
+session_destroy();
 
-  return (
-    <button onClick={logout}>
-      Выйти
-    </button>
-  );
-}
+// Возвращаем успешный ответ
+echo json_encode(['status' => 'success']);
+exit();
+?>
