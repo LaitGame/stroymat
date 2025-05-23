@@ -77,7 +77,9 @@ include 'includes/header.php';
                             <p class="card-text"><?= htmlspecialchars(mb_substr($product['description'], 0, 100)) ?>...</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="price fw-bold"><?= number_format($product['price'], 2) ?> руб.</span>
-                                <a href="/product.php?id=<?= $product['id'] ?>" class="btn btn-primary">Подробнее</a>
+                                <button class="btn btn-primary add-to-cart" data-id="<?= $product['id'] ?>">
+                                    <i class="bi bi-cart-plus"></i> В корзину
+                                </button>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent">
