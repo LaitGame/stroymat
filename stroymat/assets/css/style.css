@@ -260,22 +260,37 @@ body {
     transform: scale(1.1);
 }
 
-/* Стили для корзины */
+/* Стили корзины */
 .cart-icon {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 1000;
-  background: #fff;
-  padding: 10px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
 }
 
-.cart-icon:hover {
-  background: #f0f0f0;
+.cart-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100%;
+    background: #fff;
+    z-index: 1001;
+    padding: 20px;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 /* Модальное окно */
