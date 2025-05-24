@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>СтройМатериалы - интернет-магазин</title>
+    <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'СтройМатериалы - интернет-магазин' ?></title>
     
     <!-- Основные CSS -->
     <link rel="stylesheet" href="/assets/css/style.css">
@@ -229,6 +229,11 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <i class="bi bi-person-circle"></i> <?= htmlspecialchars($_SESSION['username']) ?>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end">
+                                        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin']): ?>
+                                            <li><a class="dropdown-item" href="/admin/"><i class="bi bi-gear"></i> Админ-панель</a></li>
+                                        <?php endif; ?>
+                                        <li><a class="dropdown-item" href="/profile.php"><i class="bi bi-person"></i> Профиль</a></li>
+                                        <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" href="/auth/logout.php"><i class="bi bi-box-arrow-right"></i> Выйти</a></li>
                                     </ul>
                                 </div>
@@ -251,7 +256,21 @@ if (session_status() === PHP_SESSION_NONE) {
     <div class="cart-icon-wrapper">
         <div id="cart-icon" class="cart-icon">
             <i class="bi bi-cart3"></i>
-            <span id="cart-count" class="badge bg-danger">0</span>
+            <span id="cart-count" class="badge bg-danger">
+                <?php
+                try {
+                    if (isset($_SESSION['user_id'])) {
+                        require_once 'includes/db.php';
+                        $count = fetchOne("SELECT SUM(quantity) as count FROM cart WHERE user_id = ?", [$_SESSION['user_id']]);
+                        echo $count['count'] ?? 0;
+                    } else {
+                        echo 0;
+                    }
+                } catch (Exception $e) {
+                    echo 0;
+                }
+                ?>
+            </span>
         </div>
     </div>
     

@@ -13,14 +13,12 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 $product_id = (int)$_GET['id'];
 
 // Получаем данные товара
-$stmt = $pdo->prepare("
+$product = fetchOne("
     SELECT p.*, c.name as category_name 
     FROM products p
     LEFT JOIN categories c ON p.category_id = c.id
     WHERE p.id = ?
-");
-$stmt->execute([$product_id]);
-$product = $stmt->fetch();
+", [$product_id]);
 
 // Если товар не найден
 if (!$product) {
@@ -28,15 +26,18 @@ if (!$product) {
     exit;
 }
 
+// Устанавливаем значение stock по умолчанию, если его нет
+if (!isset($product['stock'])) {
+    $product['stock'] = 10; // или любое другое значение по умолчанию
+}
+
 // Получаем похожие товары
-$similar_stmt = $pdo->prepare("
+$similar_products = fetchAll("
     SELECT * FROM products 
     WHERE category_id = ? AND id != ?
     ORDER BY RAND() 
     LIMIT 4
-");
-$similar_stmt->execute([$product['category_id'], $product_id]);
-$similar_products = $similar_stmt->fetchAll();
+", [$product['category_id'], $product_id]);
 
 include 'includes/header.php';
 ?>
@@ -55,7 +56,7 @@ include 'includes/header.php';
         <!-- Изображение товара -->
         <div class="col-md-6">
             <div class="card mb-4">
-                <img src="/assets/images/products/<?= htmlspecialchars($product['image']) ?>" 
+                <img src="/assets/images/products/<?= htmlspecialchars($product['image'] ?? 'no-image.jpg') ?>" 
                      class="card-img-top" 
                      alt="<?= htmlspecialchars($product['name']) ?>"
                      style="max-height: 500px; object-fit: contain;">
@@ -81,19 +82,26 @@ include 'includes/header.php';
                 <div class="card-body">
                     <h3 class="text-primary mb-3"><?= number_format($product['price'], 2) ?> руб.</h3>
                     
-                    <div class="d-flex mb-3">
-                        <div class="me-3">
-                            <button class="btn btn-outline-secondary">-</button>
-                            <span class="mx-2">1</span>
-                            <button class="btn btn-outline-secondary">+</button>
+                    <form class="add-to-cart-form">
+                        <input type="hidden" name="csrf_token" value="<?= generateCsrfToken() ?>">
+                        <div class="d-flex mb-3">
+                            <div class="me-3">
+                                <button type="button" class="btn btn-outline-secondary quantity-minus">-</button>
+                                <input type="number" name="quantity" class="form-control d-inline-block mx-2 text-center" 
+                                       value="1" min="1" max="<?= $product['stock'] ?>" style="width: 60px;">
+                                <button type="button" class="btn btn-outline-secondary quantity-plus">+</button>
+                            </div>
+                            <button type="button" class="btn btn-primary flex-grow-1 add-to-cart-btn"
+                                    data-product-id="<?= $product['id'] ?>"
+                                    <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
+                                <i class="bi bi-cart-plus"></i> 
+                                <?= $product['stock'] > 0 ? 'В корзину' : 'Нет в наличии' ?>
+                            </button>
                         </div>
-                        <button class="btn btn-primary flex-grow-1">
-                            <i class="bi bi-cart-plus"></i> В корзину
-                        </button>
-                    </div>
+                    </form>
                     
                     <div class="d-grid gap-2">
-                        <button class="btn btn-outline-success">
+                        <button class="btn btn-outline-success" <?= $product['stock'] <= 0 ? 'disabled' : '' ?>>
                             <i class="bi bi-lightning"></i> Купить в 1 клик
                         </button>
                     </div>
@@ -139,9 +147,9 @@ include 'includes/header.php';
                     <h5 class="mb-0">Описание</h5>
                 </div>
                 <div class="card-body">
-                    <p><?= nl2br(htmlspecialchars($product['description'])) ?></p>
+                    <p><?= nl2br(htmlspecialchars($product['description'] ?? 'Описание отсутствует')) ?></p>
                     
-                    <?php if ($product['name'] == 'Кирпич строительный М-150'): ?>
+                    <?php if (isset($product['name']) && $product['name'] == 'Кирпич строительный М-150'): ?>
                         <h6>Особенности:</h6>
                         <ul>
                             <li>Высокая прочность (М-150)</li>
@@ -149,7 +157,7 @@ include 'includes/header.php';
                             <li>Низкое водопоглощение</li>
                             <li>Идеальная геометрия</li>
                         </ul>
-                    <?php elseif ($product['name'] == 'Штукатурка гипсовая'): ?>
+                    <?php elseif (isset($product['name']) && $product['name'] == 'Штукатурка гипсовая'): ?>
                         <h6>Преимущества:</h6>
                         <ul>
                             <li>Готовая смесь - просто добавь воды</li>
@@ -172,7 +180,7 @@ include 'includes/header.php';
                     <?php foreach ($similar_products as $similar): ?>
                         <div class="col-md-3 mb-4">
                             <div class="card h-100">
-                                <img src="/assets/images/products/<?= htmlspecialchars($similar['image']) ?>" 
+                                <img src="/assets/images/products/<?= htmlspecialchars($similar['image'] ?? 'no-image.jpg') ?>" 
                                      class="card-img-top" 
                                      alt="<?= htmlspecialchars($similar['name']) ?>"
                                      style="height: 180px; object-fit: cover;">
@@ -186,6 +194,10 @@ include 'includes/header.php';
                                     <a href="/product.php?id=<?= $similar['id'] ?>" class="btn btn-sm btn-outline-primary w-100">
                                         Подробнее
                                     </a>
+                                    <button class="btn btn-sm btn-outline-success w-100 mt-2 add-to-cart-btn"
+                                            data-product-id="<?= $similar['id'] ?>">
+                                        В корзину
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -195,5 +207,38 @@ include 'includes/header.php';
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработчики изменения количества
+    document.querySelectorAll('.quantity-minus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.nextElementSibling;
+            if (parseInt(input.value) > parseInt(input.min)) {
+                input.value = parseInt(input.value) - 1;
+            }
+        });
+    });
+
+    document.querySelectorAll('.quantity-plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            if (parseInt(input.value) < parseInt(input.max)) {
+                input.value = parseInt(input.value) + 1;
+            }
+        });
+    });
+
+    // Обработчики добавления в корзину
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const quantity = this.closest('form')?.querySelector('input[name="quantity"]')?.value || 1;
+            
+            addToCart(productId, quantity);
+        });
+    });
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>

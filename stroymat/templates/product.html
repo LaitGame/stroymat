@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} - Стройматериалы</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Стройматериалы</h1>
+        <nav>
+            <a href="/">Главная</a>
+            <a href="/cart">Корзина (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="product-detail">
+            <img src="/static/images/{{ product.image }}" alt="{{ product.name }}">
+            <h2>{{ product.name }}</h2>
+            <p class="price">{{ product.price }} ₽</p>
+            <p class="description">{{ product.description }}</p>
+            
+            <form class="add-to-cart-form" onsubmit="addToCart(event, {{ product.id }})">
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <input type="number" name="quantity" value="1" min="1" class="quantity-input">
+                <button type="submit" class="add-to-cart-button">В корзину</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Стройматериалы. Все права защищены.</p>
+    </footer>
+
+    <script src="/static/js/cart.js"></script>
+</body>
+</html>
