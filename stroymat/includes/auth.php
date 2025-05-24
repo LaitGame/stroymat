@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Проверяем, не активна ли уже сессия
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Проверка авторизации пользователя
 function isLoggedIn() {

@@ -267,7 +267,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <?php
                 try {
                     if (isset($_SESSION['user_id'])) {
-                        require_once 'includes/db.php';
+                        require_once __DIR__ . '/../includes/db.php';
                         $count = fetchOne("SELECT SUM(quantity) as count FROM cart WHERE user_id = ?", [$_SESSION['user_id']]);
                         echo $count['count'] ?? 0;
                     } else {
