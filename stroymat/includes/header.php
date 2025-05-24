@@ -30,7 +30,7 @@ if (empty($_SESSION['csrf_token'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <style>
-        /* Основные стили шапки */
+        /* Все ваши текущие стили остаются без изменений */
         .navbar-brand {
             font-weight: bold;
             font-size: 1.5rem;
@@ -53,15 +53,12 @@ if (empty($_SESSION['csrf_token'])) {
             align-items: center;
             justify-content: center;
         }
-        
-        /* Стили корзины */
         .cart-icon-wrapper {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
         }
-        
         .cart-icon {
             background: white;
             padding: 10px 15px;
@@ -72,23 +69,19 @@ if (empty($_SESSION['csrf_token'])) {
             display: flex;
             align-items: center;
         }
-        
         .cart-icon:hover {
             transform: scale(1.05);
             box-shadow: 0 0 15px rgba(0,0,0,0.2);
         }
-        
         .cart-icon .bi-cart3 {
             font-size: 1.5rem;
         }
-        
         .cart-icon .badge {
             font-size: 0.8rem;
             position: absolute;
             top: -5px;
             right: -5px;
         }
-        
         .cart-modal {
             display: none;
             position: fixed;
@@ -100,7 +93,6 @@ if (empty($_SESSION['csrf_token'])) {
             background-color: rgba(0,0,0,0.5);
             overflow-y: auto;
         }
-        
         .cart-modal-content {
             background-color: white;
             margin: 2% auto;
@@ -110,14 +102,12 @@ if (empty($_SESSION['csrf_token'])) {
             border-radius: 8px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        
         .cart-item {
             display: flex;
             align-items: center;
             padding: 15px 0;
             border-bottom: 1px solid #eee;
         }
-        
         .cart-item-img {
             width: 80px;
             height: 80px;
@@ -125,24 +115,20 @@ if (empty($_SESSION['csrf_token'])) {
             margin-right: 20px;
             border-radius: 4px;
         }
-        
         .cart-item-info {
             flex-grow: 1;
         }
-        
         .cart-item-controls {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 10px;
         }
-        
         .cart-item-price {
             font-weight: bold;
             min-width: 100px;
             text-align: right;
         }
-        
         .added-to-cart-message {
             position: fixed;
             bottom: 20px;
@@ -157,8 +143,6 @@ if (empty($_SESSION['csrf_token'])) {
             border-radius: 5px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         }
-        
-        /* Стили для поиска */
         .search-suggestions {
             position: absolute;
             z-index: 1000;
@@ -182,12 +166,7 @@ if (empty($_SESSION['csrf_token'])) {
         .input-group {
             position: relative;
         }
-        
-        /* Стили для кнопки выхода в dropdown */
-        .logout-form {
-            display: block;
-            padding: 0;
-        }
+        /* Новые стили для кнопки выхода */
         .logout-btn {
             background: none;
             border: none;
@@ -195,6 +174,7 @@ if (empty($_SESSION['csrf_token'])) {
             text-align: left;
             padding: 0.25rem 1rem;
             color: #212529;
+            cursor: pointer;
         }
         .logout-btn:hover {
             color: #0d6efd;
@@ -231,7 +211,7 @@ if (empty($_SESSION['csrf_token'])) {
                             <?php endif; ?>
                         </ul>
                         
-                        <!-- Поиск -->
+                        <!-- Поиск (без изменений) -->
                         <div class="search-container me-3">
                             <form action="/products.php" method="get" class="d-flex">
                                 <div class="input-group">
@@ -258,12 +238,9 @@ if (empty($_SESSION['csrf_token'])) {
                                         <li><a class="dropdown-item" href="/profile.php"><i class="bi bi-person"></i> Профиль</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
-                                            <form action="/auth/logout.php" method="post" class="logout-form">
-                                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                <button type="submit" class="logout-btn">
-                                                    <i class="bi bi-box-arrow-right"></i> Выйти
-                                                </button>
-                                            </form>
+                                            <button id="logoutButton" class="dropdown-item logout-btn">
+                                                <i class="bi bi-box-arrow-right"></i> Выйти
+                                            </button>
                                         </li>
                                     </ul>
                                 </div>
@@ -282,7 +259,7 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </header>
     
-    <!-- Иконка корзины -->
+    <!-- Иконка корзины (без изменений) -->
     <div class="cart-icon-wrapper">
         <div id="cart-icon" class="cart-icon">
             <i class="bi bi-cart3"></i>
@@ -304,7 +281,7 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </div>
     
-    <!-- Модальное окно корзины -->
+    <!-- Модальное окно корзины (без изменений) -->
     <div id="cart-modal" class="cart-modal">
         <div class="cart-modal-content">
             <button type="button" class="btn-close cart-close" aria-label="Close" style="float: right;"></button>
@@ -320,9 +297,9 @@ if (empty($_SESSION['csrf_token'])) {
     </div>
     
     <main class="container py-4">
-        <!-- Здесь будет подключаться контент страниц -->
+        <!-- Основное содержимое страницы -->
         
-        <!-- Скрипт для подсказок поиска -->
+        <!-- Скрипт для подсказок поиска (без изменений) -->
         <script>
         $(document).ready(function() {
             const searchInput = $('input[name="search"]');
@@ -350,27 +327,52 @@ if (empty($_SESSION['csrf_token'])) {
                 }
             });
             
-            // Скрываем подсказки при клике вне поля
             $(document).on('click', function(e) {
                 if (!$(e.target).closest('.input-group').length) {
                     suggestionsContainer.hide();
-                }
-            });
-            
-            // Обработка выхода с подтверждением
-            $('form[action="/auth/logout.php"]').on('submit', function(e) {
-                if (!confirm('Вы уверены, что хотите выйти?')) {
-                    e.preventDefault();
                 }
             });
         });
         </script>
     </main>
     
-    <!-- Подключаем скрипт корзины -->
+    <!-- Новый скрипт для обработки выхода -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutButton = document.getElementById('logoutButton');
+        if (logoutButton) {
+            logoutButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (confirm('Вы уверены, что хотите выйти?')) {
+                    fetch('/auth/logout.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `csrf_token=<?= $_SESSION['csrf_token'] ?>`
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.href = '/';
+                        } else {
+                            throw new Error('Ошибка выхода');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        alert('Произошла ошибка при выходе из системы');
+                    });
+                }
+            });
+        }
+    });
+    </script>
+    
+    <!-- Подключаем скрипт корзины (без изменений) -->
     <script src="/assets/js/cart.js"></script>
     
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS (без изменений) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
