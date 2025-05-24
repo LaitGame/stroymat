@@ -4,6 +4,11 @@ ini_set('display_errors', 1);
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
+// Генерация CSRF-токена если его нет
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -177,6 +182,24 @@ if (session_status() === PHP_SESSION_NONE) {
         .input-group {
             position: relative;
         }
+        
+        /* Стили для кнопки выхода в dropdown */
+        .logout-form {
+            display: block;
+            padding: 0;
+        }
+        .logout-btn {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 0.25rem 1rem;
+            color: #212529;
+        }
+        .logout-btn:hover {
+            color: #0d6efd;
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -234,7 +257,14 @@ if (session_status() === PHP_SESSION_NONE) {
                                         <?php endif; ?>
                                         <li><a class="dropdown-item" href="/profile.php"><i class="bi bi-person"></i> Профиль</a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/auth/logout.php"><i class="bi bi-box-arrow-right"></i> Выйти</a></li>
+                                        <li>
+                                            <form action="/auth/logout.php" method="post" class="logout-form">
+                                                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                <button type="submit" class="logout-btn">
+                                                    <i class="bi bi-box-arrow-right"></i> Выйти
+                                                </button>
+                                            </form>
+                                        </li>
                                     </ul>
                                 </div>
                             <?php else: ?>
@@ -324,6 +354,13 @@ if (session_status() === PHP_SESSION_NONE) {
             $(document).on('click', function(e) {
                 if (!$(e.target).closest('.input-group').length) {
                     suggestionsContainer.hide();
+                }
+            });
+            
+            // Обработка выхода с подтверждением
+            $('form[action="/auth/logout.php"]').on('submit', function(e) {
+                if (!confirm('Вы уверены, что хотите выйти?')) {
+                    e.preventDefault();
                 }
             });
         });

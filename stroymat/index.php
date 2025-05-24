@@ -129,4 +129,25 @@ include 'includes/header.php';
     </div>
 </section>
 
+<!-- Скрипт для обработки выхода -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            fetch('/includes/logout.php', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        });
+    }
+});
+</script>
+
 <?php include 'includes/footer.php'; ?>
